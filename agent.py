@@ -9,11 +9,13 @@ from collections import namedtuple
 ######################################
 ########## Benchmark Agent ###########
 ######################################
-import csv
+debug = False
 
-myfile = open('/home/rafaelcastillo/MLND/Project4/smartcab/rewards_smart.csv', 'wb')
-wr = csv.writer(myfile, quoting=csv.QUOTE_NONE)
-reward_per_action = []
+if debug:
+    import csv
+    myfile = open('rewards_smart.csv', 'wb')
+    wr = csv.writer(myfile, quoting=csv.QUOTE_NONE)
+    reward_per_action = []
 #times_reaches_destination = []
 #reward_per_trial = []
 ######################################
@@ -51,7 +53,7 @@ class LearningAgent(Agent):
 
         # Execute action and get reward
         reward = self.env.act(self, action)
-        reward_per_action.append(float(reward))
+        if debug: reward_per_action.append(float(reward))
         inputs = self.env.sense(self)
         state2 = State(inputs['light'],inputs['oncoming'],inputs['left'],inputs['right'],self.next_waypoint)
         self.qvalues = QTable.update_qvalue(self.qvalues,self.state,action,state2,reward,self.alpha,self.gamma)
@@ -69,7 +71,7 @@ def run():
     # Now simulate it
     sim = Simulator(e, update_delay=0.01)  # reduce update_delay to speed up simulation
     sim.run(n_trials=100)  # press Esc or close pygame window to quit
-    wr.writerow(reward_per_action)
+    if debug: wr.writerow(reward_per_action)
 
 
 if __name__ == '__main__':
