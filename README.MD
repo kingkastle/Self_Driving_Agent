@@ -23,7 +23,7 @@ In order to provide the ability to the agent of learning from previous states, a
  - traffic on the right
  - Action taken
 
-Each state&action in the the Q-matrix has a particular value that is updated accordingly to the regard obtained. At the very begining of the game, all possible pairs of states and actions had been assigned to a value of 0 but as the agent walks through the different states and takes different actions received rewards are used to update values. Values are updated with the received reward of the current state plus the action that maximizes Q-value for the next state.
+Each state&action in the the Q-matrix has a particular value that is updated accordingly to the regard obtained. At the very begining of the game, all possible pairs of states and actions had been assigned to a value of 0 but as the agent walks through the different states and takes different actions received rewards are used to update values. Values are updated with the received reward of the current state plus the maximun Q-value for the next state among all possible actions.
 
 ### Results:
 In the following graph it is represented the total number of different rewards for a simulation of 100 trials for an "intelligent" and "non intelligent" agent. The intelligent agent uses the Q equation to identify the optimum actions while non-intelligent agent simply follows those actions towards the next waypoint indicated by the Planner.
