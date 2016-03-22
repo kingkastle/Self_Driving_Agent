@@ -30,7 +30,7 @@ class LearningAgent(Agent):
         self.planner = RoutePlanner(self.env, self)  # simple route planner to get next_waypoint
         # TODO: Initialize any additional variables here
         State = namedtuple('State','light oncoming left right next_waypoint')
-        self.alpha = 0.8
+        self.alpha = 0.4
         self.gamma = 0.6
         self.state = State(None,None,None,None,None)
         self.qvalues = {}
