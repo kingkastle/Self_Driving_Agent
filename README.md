@@ -39,10 +39,10 @@ Each state&action in the the Q-matrix has a particular value that is updated acc
 #### Q-learning agent:
 Agent target is to reach destination while maximizing rewards received, for such reason q-learning agent follows the Planner policy but "senses" enviroment states (traffic + street light + Next waypoint) to decide which action take. The way the agent moves around the environment is the following:
 
-1) Sense current state (state1)
-2) Choose an action (action1) that maximizes Q-equation from this current state
-3) Take the selected action and move agent to the next state (state2) and get a reward
-4) Sense the new state and update the Q-equation for (state1,action1) using the reward just received and the (state2,action2), being action2 the action that maximizes Q-equation for state2 
+1. Sense current state (state1)
+2. Choose an action (action1) that maximizes Q-equation from this current state
+3. Take the selected action and move agent to the next state (state2) and get a reward
+4. Sense the new state and update the Q-equation for (state1,action1) using the reward just received and the (state2,action2), being action2 the action that maximizes Q-equation for state2 
 
 
 #### Difference between Basic Agent and q-learning Agent:
