@@ -5,19 +5,18 @@ from simulator import Simulator
 import QTable
 import numpy as np
 from collections import namedtuple
+import pandas
 
 ######################################
 ########## Benchmark Agent ###########
 ######################################
-debug = False
+debug = True
+df_results = pandas.DataFrame(columns = ['Trial','Movement','Performance'])
+trial = 1
+nrow = 1
+movement = 1
 
-if debug:
-    import csv
-    myfile = open('rewards_smart.csv', 'wb')
-    wr = csv.writer(myfile, quoting=csv.QUOTE_NONE)
-    reward_per_action = []
-#times_reaches_destination = []
-#reward_per_trial = []
+if debug:  myfile = open('rewards_smart_alpha06gamma08_09epsilon.csv', 'w')
 ######################################
 ######################################
 
@@ -29,10 +28,11 @@ class LearningAgent(Agent):
         self.color = 'red'  # override color
         self.planner = RoutePlanner(self.env, self)  # simple route planner to get next_waypoint
         # TODO: Initialize any additional variables here
-        State = namedtuple('State','light oncoming left right next_waypoint')
-        self.alpha = 0.4
-        self.gamma = 0.6
-        self.state = State(None,None,None,None,None)
+        State = namedtuple('State','light next_waypoint')
+        self.alpha = 0.5
+        self.gamma = 0.3
+        self.epsilon = 0.9
+        self.state = State(None,None)
         self.qvalues = {}
 
     def reset(self, destination=None):
@@ -46,16 +46,16 @@ class LearningAgent(Agent):
         deadline = self.env.get_deadline(self)
 
         # TODO: Update state
-        State = namedtuple('State','light oncoming left right next_waypoint')
-        self.state = State(inputs['light'],inputs['oncoming'],inputs['left'],inputs['right'],self.next_waypoint)
+        State = namedtuple('State','light next_waypoint')
+        self.state = State(inputs['light'],self.next_waypoint)
         # TODO: Select action according to your policy
-        action = QTable.get_action(self.qvalues,self.state)
+        action = QTable.get_action(self.qvalues,self.state,self.epsilon)
 
         # Execute action and get reward
         reward = self.env.act(self, action)
-        if debug: reward_per_action.append(float(reward))
+        if debug: myfile.write(str(float(reward)) + "\n")
         inputs = self.env.sense(self)
-        state2 = State(inputs['light'],inputs['oncoming'],inputs['left'],inputs['right'],self.next_waypoint)
+        state2 = State(inputs['light'],self.next_waypoint)
         self.qvalues = QTable.update_qvalue(self.qvalues,self.state,action,state2,reward,self.alpha,self.gamma)
         # TODO: Learn policy based on state, action, reward
         print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
@@ -69,9 +69,9 @@ def run():
     e.set_primary_agent(a, enforce_deadline=True)  # set agent to track
 
     # Now simulate it
-    sim = Simulator(e, update_delay=0.01)  # reduce update_delay to speed up simulation
-    sim.run(n_trials=100)  # press Esc or close pygame window to quit
-    if debug: wr.writerow(reward_per_action)
+    sim = Simulator(e, update_delay=0.001)  # reduce update_delay to speed up simulation
+    sim.run(n_trials=800)  # press Esc or close pygame window to quit
+    if debug: myfile.close()
 
 
 if __name__ == '__main__':

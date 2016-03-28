@@ -17,27 +17,25 @@ Agent uses a planner to reach destination, **this planner identifies the next wa
 
 #### States:
 Agent' state includes the following information:
- - Street light color 
- - Oncoming traffic 
- - traffic on the left 
- - traffic on the right
- - Next waypoint
+ - Street light: Agent's movements are determined by traffic light color and so rewards
+ - Next waypoint: Agent's actions must be oriented to the next waypoint defined by the Planner in order to reach destination, rewards = +2 when a valid action drives the agent to the next waypoint
 
-Since rewards are related to actions taken and environment rules defined by traffic conditions (Oncoming, left, right), street light colors and next waypoint, agent' state need to include this information to learn which action maximizes rewards for the current conditions (traffic + street lights + next waypoint).
+Since rewards are related to street light colors and next waypoint, agent' state need to include this information in order to learn which action maximizes rewards and so learn how to drive towards destination. Some more information could be added to the agent' state, however since rewards are just function of these variables, there is no benefit in including more info while it would make the problem more complex to solve.
+
+**IMPORTANT I**: Traffic conditions are not considered since rewards does not include them as a variable. This is an enviroment deficiency probably originated because there are not much trafic and its implementation is probably difficult.
+
+**IMPORTANT II**: Time steps remaining or distance to destination are not included since rewards are not defined as a function of any of these factors. A way to improve this project is probably to include a reward of -0.5 when the agent performs a valid action that increases its relative distance to destination, with this information included in the reward definition, the relative distance to destination would be another factor in the agent' state definition.
 
 #### Q-Learning:
 In order to provide the ability to the agent of learning from previous states, a Q-matrix is generated. Each element of this Q matrix is an agent state&action which includes the following information: 
  - Street light color 
- - Oncoming traffic 
- - traffic on the left 
- - traffic on the right
  - Next waypoint
  - Action taken
 
 Each state&action in the the Q-matrix has a particular value that is updated accordingly to the reward obtained. At the very begining of the game, all possible pairs of states and actions had been assigned to a value of 0 but as the agent walks through the different states and takes different actions received rewards are used to update values. Values are updated with the received reward of the current state plus the maximun Q-value for the next state among all possible actions.
 
 #### Q-learning agent:
-Agent target is to reach destination while maximizing rewards received, for such reason q-learning agent follows the Planner policy but "senses" enviroment states (traffic + street light + Next waypoint) to decide which action take. The way the agent moves around the environment is the following:
+Agent target is to reach destination while maximizing rewards received, for such reason q-learning agent follows the Planner policy but "senses" enviroment states (street light + Next waypoint) to decide which action take. The way the agent moves around the environment is the following:
 
 1. Sense current state (state1)
 2. Choose an action (action1) that maximizes Q-equation from this current state
@@ -45,46 +43,52 @@ Agent target is to reach destination while maximizing rewards received, for such
 4. Sense the new state and update the Q-equation for (state1,action1) using the reward just received and the (state2,action2), being action2 the action that maximizes Q-equation for state2 
 
 
-#### Difference between Basic Agent and q-learning Agent:
-Basic agent is not "sensing" the environment conditions and simply follows planner actions defined to reach final destination. As a consequence it performs actions that are negatively rewarded, in the other hand q-learning agent "senses" the environment anytime it needs to take an action and so understand the environment conditions, although q-learning agent also follows planner actions, at every step the final decision it takes is the one that maximizes rewards, independenly of the planner action required. In practice, basically the main difference between agents is that basic agent never takes an action = 'None' while q-learning agent takes it every time the planner action has associated a negative regard for the current state conditions.
+#### Learning process of the Q-learning agent:
+Q-learning agent uses Q-learning equation to identify the best action for any possible state. At the very beggining Q-learning equation equals cero for all possible states&actions, in this phase agent simply performes random actions, of course this has negative consequences since in many occasions it performs forbiden actions with negative rewards associated. However as the agent keeps driving and moves around through different states, occasionaly it falls in a state it was previously, and since it follows Q-learning principle of taking the action that maximize rewards, agent takes the action that maximizes rewards according to its accumulated experience. Apart of this, since there are several possible actions with positive rewards associated, a greedy policy is included to allow the agent to explore alternative actions to the currently more suitable. For example, in this particular problem agent receives a reward of +1 when action=None, so if the agent at the begining of the game discovers that not moving has associated a positive reward, then it always choose this action as optimum, but since the greedy policy is included, eventually it discovers that moving accordingly to the Planner has a bigger reward associated: +2. This is how the agent learns to follow the optimal policy and stop when it is not possible.  
 
-#### Learning Rate (alpha) and Discount Factor (gamma) tuning:
+#### Greedy Policy (epsilon), Learning Rate (alpha) and Discount Factor (gamma) tuning:
+As previously described, a Greedy Policy is introduced to allow the agent to occasionaly not to take the optimal action according to its experience.
+Next graph shows how different values of epsilon affected to the agent performance over 100 trials. In the X axis are included buckets of 100 agent movements and Y-axis represents the mean reward per bucket. Low epsilon values have associated low means while high values of epsilon high means, another conclusion is that higher epsilons have associated a more efficient driving, since it tends to reach destination in fewer movements, for example epsilon values higher than 0.8 finish 100 trials in less than 2000 movements.
+
+![Epsilon](epsilon.png?raw=true) 
+
+
 The parameters used in the Q-value update process are:
 
  - the learning rate (alpha), set between 0 and 1. Setting it to 0 means that the Q-values are never updated, hence nothing is learned. Setting a high value such as 0.9 means that learning can occur quickly.
  - discount factor (gamma), also set between 0 and 1. This models the fact that future rewards are worth less than immediate rewards. Mathematically, the discount factor needs to be set less than 0 for the algorithm to converge.
 
-**Gamma = 0.6**
+In order to tune Gamma and Alpha values, agent's performance is benchmarked with the Optimal policy, which is defined as follows: Agent follows the Planner expect on those situations when it is not possible, in that case agent's action is None.
 
-|Rewards|alpha 0.2|alpha 0.4|alpha 0.6|alpha 0.8|
-|:-----:|:-----:|:-----:|:-----:|:-----:|				
-|-1|17|17|16|18|
-|0.5|4|363|3|239|
-|1|635|10|623|282|
-|2|489|949|507|766|
-|12|100|98|100|95|
-|TOTAL|2798|3248.5|2822.5|3055.5|
+Following graphs shows agent's performance (using epsilon=0.9) for 800 consecutive trials for different combinations of alpha and gamma with the objetive of identifying which parameters combinations maximize agents performance according to the Optimal policy defined. In the Y-axis it is represented the percentage of times agent follows the Optimal Policy for the different 100-movement buckets in X-axis.
 
-**Gamma = 0.2**
+![ag0303](ag0303.png?raw=true)
 
-|Rewards|alpha 0.2|alpha 0.4|alpha 0.6|alpha 0.8|
-|:-----:|:-----:|:-----:|:-----:|:-----:|				
-|-1|12|14|13|9|
-|1|546|652|591|644|
-|2|505|492|523|513|
-|12|100|100|99|100|
-|TOTAL|2744|2822|2812|2861|
+![ag0503](ag0503.png?raw=true)
 
-The selected alpha and gamma values are 0.4 and 0.6 respectively since these values maximizes rewards obtained (1364).
+![ag0903](ag0903.png?raw=true)
+
+![ag0305](ag0303.png?raw=true)
+
+![ag0309](ag0309.png?raw=true)
+
+![ag0505](ag0505.png?raw=true)
+
+![ag0909](ag0909.png?raw=true)
+
+
+
+According to these results, alpha = 0.3 and gamma = 0.9 is used.
+
 
 
 #### Results:
-In the following graph it is represented the total number of different rewards for a simulation of 100 trials for an "intelligent" and "non intelligent" agent. The intelligent agent uses the Q equation to identify the optimum actions while non-intelligent agent simply follows those actions towards the next waypoint indicated by the Planner.
+In the following graph it is represented the total number of different rewards for a simulation of 100 trials for the Q-learning agent (let's call it Q-Agent), agent that always follows the Planner (let's call it P-Agent) and a dummy agent that takes random actions (let's call it Dummy).
 
-In the way rewards are defined, since an action=None has a rewards of 1, while an action that is valid but not to the next_waypoint is rewarded with 0.5, it is not expected the intelligent agent to be faster than the non-trained agent reaching destination, but an overall increase of the rewards obtained, as the following graph shows:
+![Agent_performance](Agent_performance.png?raw=true)
+
+As we can see Q-agent maximizes +2 rewards (since it follows Q-equation principle) while P-agent more often reaches destination but with significant -1 rewards (since it drives towards destination all the time and in many occasions actions taken are not allowed). To end, Dummy hardly reaches destination (since it moves randomly).
+
 
 #### Conclussion:
-Q-learning agent behaves optimally following the planner when possible avoiding negative rewards. However planner is limited since in most occasions there are two valid actions but it only returns one. As a consequence, q-learning agent does not reaches destination more quickly than the basic agent does, however it maximizes rewards along the way. To avoid such shortcomming the planner should return two optimum actions when possible and let the agent to decide which action take, doing so q-learning object would not just maximize regrads, but also reach destination faster than basic agent.
-
-
-![Rewards](rewards.png?raw=true)
+Q-Agent moves around the environment following the Q learning principle of maximice rewards at every state. As a consecuence at the very begining of the game it moves ramdomly but it soon tends to repeat those movements that produced a positive rewards, for example right-loops or not taken any action are quite common. However as the agent gains more and more experience, and the greedy policy helps him to investigate alternative actions, agent learns more and resolves situations diferently. As said, at the beggining the agent basically moves basically randomly around the enviroment, but step-by-step it discovers those state&action with positive rewards and try to repeat them as much as possible (right loops or none action), and as it gains more and more experience, agent starts to drive towards the destination more consistenly and so following the optimal policy.
