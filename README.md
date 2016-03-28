@@ -62,15 +62,16 @@ In order to tune Gamma and Alpha values, agent's performance is benchmarked with
 
 Following graphs shows agent's performance (using epsilon=0.9) for 800 consecutive trials for different combinations of alpha and gamma with the objetive of identifying which parameters combinations maximize agents performance according to the Optimal policy defined. In the Y-axis it is represented the percentage of times agent follows the Optimal Policy for the different 100-movement buckets in X-axis.
 
-![ag0303](ag0303.png?raw=true)
 
 ![ag0503](ag0503.png?raw=true)
 
 ![ag0903](ag0903.png?raw=true)
 
-![ag0305](ag0303.png?raw=true)
+![ag0305](ag0305.png?raw=true)
 
 ![ag0309](ag0309.png?raw=true)
+
+![ag0303](ag0303.png?raw=true)
 
 ![ag0505](ag0505.png?raw=true)
 
